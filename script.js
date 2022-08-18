@@ -1,12 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     // Select all squares and add listener waiting for click
-    document.querySelectorAll('#cells').forEach((cell) =>
-        cell.addEventListener('click', (e) => {
-            gameControls.makePlay(e, player1, player2, testBoard)
+    document.querySelectorAll('.cells').forEach((cell) =>
+        cell.addEventListener('click', () => {
+            gameControls.makePlay(cell.value, testBoard)
         })
     )
+
+    document.getElementById('newBtn').addEventListener("click", () => 
+        gameControls.nextGame(testBoard)
+    )
 })
+
+
 
 class GameBoard {
     // Construct controlBoard and displayBoard
@@ -32,7 +38,7 @@ class GameBoard {
         }
     }
 
-    rest() {
+    boardReset() {
         this.controlBoard = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         this.displayBoard = ["", "", "", "", "", "", "", "", ""]
     }
@@ -40,7 +46,7 @@ class GameBoard {
 
 class Player {
     constructor(marker, name, plays=[]){
-        this.marker = maker;
+        this.marker = marker;
         this.plays = plays;
         this.name = name;
     }
@@ -55,13 +61,10 @@ class Player {
 
     // If one of the winning arrays values is in plays, player has won
     hasWon() {
-        wins = [[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9],[1,5,9],[3,5,7]]
-        
+        let wins = [[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9],[1,5,9],[3,5,7]]
         let res = false
-
         wins.forEach(i=> {
-            if(i.every((e) => array2.includes(e))){
-                console.log("Winner")
+            if(i.every((e) => this.plays.includes(e))){
                 res = true
             }
         })
@@ -70,6 +73,77 @@ class Player {
     }
 }
 
-const player1 = new Player("X")
-const player2 = new Player("O")
+const displayControls = (() => {
+    function showCurrentPlayer(player) {
+        const playerSpan = document.querySelector('#player')
+        playerSpan.innerText = player.name
+    }
 
+    function boardUpdate(displayBoard) {
+        for (let i = 0; i < displayBoard.length; i++) {
+            let activeCell = document.getElementById(`${i}`)
+            activeCell.innerText = displayBoard[i]
+        }
+    }
+
+    function setWinner(player) {
+        const winner = document.querySelector('#winner')
+        winner.innerText = `${player.name} has won!`
+    }
+
+    function clearWinner() {
+        const winner = document.querySelector('#winner')
+        winner.innerText = ''
+    }
+
+    return {boardUpdate, showCurrentPlayer, setWinner, clearWinner}
+})()
+
+const gameControls = (() => {
+
+    playerSign = true
+    function togglePlayer() {
+        if(playerSign) {
+            playerSign = false
+            return player1
+        }
+        else{
+            playerSign = true
+            return player2
+        }
+    }
+
+    function nextGame(activeBoard) {
+        player1.clearPlays()
+        player2.clearPlays()
+        activeBoard.boardReset()
+        displayControls.boardUpdate(activeBoard.displayBoard)
+        displayControls.clearWinner()
+        displayControls.showCurrentPlayer(togglePlayer())
+    }
+
+    function endGame(player, activeBoard) {
+        console.log(player.hasWon())
+        if (player.hasWon()){
+            displayControls.setWinner(player)
+        }
+    }
+
+    function makePlay(eventI, activeBoard) {
+        let player = togglePlayer()
+        let cellValue = parseFloat(eventI)
+        activeBoard.markBoard(cellValue, player.marker)
+        player.addPlay(cellValue)
+        displayControls.boardUpdate(activeBoard.displayBoard)
+        displayControls.showCurrentPlayer(player)
+        endGame(player, activeBoard)
+    }
+
+    return {makePlay, nextGame}
+    
+})()
+
+const testBoard = new GameBoard()
+let currentBoard = testBoard.displayBoard
+const player1 = new Player("X", "Player 1")
+const player2 = new Player("O", "Player 2")
