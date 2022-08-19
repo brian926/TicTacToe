@@ -52,7 +52,7 @@ class Player {
     }
 
     addPlay(play) {
-        this.plays.push(play)
+        this.plays.includes(play)
     }
 
     clearPlays(){
@@ -75,8 +75,11 @@ class Player {
 
 const displayControls = (() => {
     function showCurrentPlayer(player) {
+        let nextPlayer
+        player.name == player1.name ? nextPlayer = player2.name : nextPlayer = player1.name
+        
         const playerSpan = document.querySelector('#player')
-        playerSpan.innerText = player.name
+        playerSpan.innerText = nextPlayer
     }
 
     function boardUpdate(displayBoard) {
@@ -96,7 +99,24 @@ const displayControls = (() => {
         winner.innerText = ''
     }
 
-    return {boardUpdate, showCurrentPlayer, setWinner, clearWinner}
+    function tie() {
+        const winner = document.querySelector('#winner')
+        winner.innerText = 'It\'s a tie!'
+    }
+
+    function wrongChoice() {
+        const winner = document.querySelector('#winner')
+        winner.innerText = 'Square already in use'
+    }
+
+    return {
+        boardUpdate, 
+        showCurrentPlayer, 
+        setWinner, 
+        clearWinner, 
+        tie, 
+        wrongChoice
+    }
 })()
 
 const gameControls = (() => {
@@ -126,6 +146,12 @@ const gameControls = (() => {
         console.log(player.hasWon())
         if (player.hasWon()){
             displayControls.setWinner(player)
+        } else if (activeBoard.fullBoard()){
+            displayControls.tie()
+            player1.clearPlays()
+            player2.clearPlays()
+            activeBoard.boardReset()
+            displayControls.boardUpdate(activeBoard.displayBoard)
         }
     }
 
