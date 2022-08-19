@@ -7,7 +7,7 @@
 }
 
 #player, #winner {
-    width: 120px;
+    width: 90%;
     height: 25px;
     background: #f0f0f0;
     border: 1px solid #e5e5e5;
@@ -26,4 +26,10 @@ td button{
     font-size: 18px;
     font-weight: normal;
     outline: 0;
+}
+
+#newBtn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
 }

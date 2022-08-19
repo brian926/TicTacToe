@@ -36,6 +36,9 @@ class GameBoard {
             this.displayBoard[index] = playerMark
             return true
         }
+        else {
+            return false
+        }
     }
 
     boardReset() {
@@ -52,7 +55,7 @@ class Player {
     }
 
     addPlay(play) {
-        this.plays.includes(play)
+        this.plays.push(play)
     }
 
     clearPlays(){
@@ -74,6 +77,7 @@ class Player {
 }
 
 const displayControls = (() => {
+
     function showCurrentPlayer(player) {
         let nextPlayer
         player.name == player1.name ? nextPlayer = player2.name : nextPlayer = player1.name
@@ -133,35 +137,43 @@ const gameControls = (() => {
         }
     }
 
-    function nextGame(activeBoard) {
+    function clearGame(activeBoard) {
         player1.clearPlays()
         player2.clearPlays()
         activeBoard.boardReset()
+    }
+
+    function nextGame(activeBoard) {
+        clearGame(activeBoard)
         displayControls.boardUpdate(activeBoard.displayBoard)
         displayControls.clearWinner()
         displayControls.showCurrentPlayer(togglePlayer())
     }
 
     function endGame(player, activeBoard) {
-        console.log(player.hasWon())
+        console.log(player.plays, player.hasWon())
         if (player.hasWon()){
             displayControls.setWinner(player)
+            clearGame(activeBoard)
         } else if (activeBoard.fullBoard()){
             displayControls.tie()
-            player1.clearPlays()
-            player2.clearPlays()
-            activeBoard.boardReset()
+            clearGame(activeBoard)
             displayControls.boardUpdate(activeBoard.displayBoard)
         }
     }
 
     function makePlay(eventI, activeBoard) {
+        displayControls.clearWinner()
         let player = togglePlayer()
         let cellValue = parseFloat(eventI)
-        activeBoard.markBoard(cellValue, player.marker)
-        player.addPlay(cellValue)
-        displayControls.boardUpdate(activeBoard.displayBoard)
-        displayControls.showCurrentPlayer(player)
+        let check = activeBoard.markBoard(cellValue, player.marker)
+        if(check) {
+            player.addPlay(cellValue)
+            displayControls.boardUpdate(activeBoard.displayBoard)
+            displayControls.showCurrentPlayer(player)
+        } else {
+            displayControls.wrongChoice()
+        }
         endGame(player, activeBoard)
     }
 
